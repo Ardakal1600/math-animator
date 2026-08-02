@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <title>Calculadora de Huella de Carbono</title>
+   <style>
+       * {
+           box-sizing: border-box;
+           margin: 0;
+           padding: 0;
+       }
+       body {
+           background-color: #e8e2c4;
+           background-image: url('fondo.jpg');
+           background-size: cover;
+           background-position: center;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           min-height: 100vh;
+           height: 100vh;
+           overflow: hidden;
+       }
+ 
+       #contenedor-app {
+           position: relative;
+           max-width: 95vw;
+           max-height: 92vh;
+           aspect-ratio: 420 / 800;
+       }
+ 
+       canvas.emscripten {
+           border: none;
+           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+           border-radius: 16px;
+           width: 100%;
+           height: 100%;
+           display: block;
+           image-rendering: -webkit-optimize-contrast;
+           image-rendering: crisp-edges;
+       }
+ 
+       #input-nombre {
+           position: absolute;
+           left: 9.52%;
+           top: 38.75%;
+           width: 80.95%;
+           height: 5.5%;
+           opacity: 0;
+           border: none;
+           font-size: 16px;
+           background: transparent;
+       }
+   </style>
+</head>
+<body>
+   <div id="contenedor-app">
+       <canvas class="emscripten" id="canvas" style="touch-action: none;" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+       <input type="text" id="input-nombre" maxlength="31" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+   </div>
+ 
+   <script type='text/javascript'>
+       var Module = {
+           preRun: [],
+           postRun: [],
+           print: (function() {})(),
+           canvas: (function() {
+               var canvas = document.getElementById('canvas');
+               return canvas;
+           })()
+       };
+ 
+       var inputNombre = document.getElementById('input-nombre');
+       inputNombre.addEventListener('input', function () {
+           if (window.Module && Module.ccall) {
+               Module.ccall('ActualizarNombreDesdeJS', null, ['string'], [inputNombre.value]);
+           }
+       });
+ 
+       function ajustarNitidezCanvas() {
+           var canvas = document.getElementById('canvas');
+           if (!canvas) return;
+           
+           var dpr = window.devicePixelRatio || 1;
+           var rect = canvas.getBoundingClientRect();
+           
+           var anchoFisico = Math.round(rect.width * dpr);
+           var altoFisico = Math.round(rect.height * dpr);
+           
+           if (canvas.width !== anchoFisico || canvas.height !== altoFisico) {
+               canvas.width = anchoFisico;
+               canvas.height = altoFisico;
+               
+               if (window.Module && Module.setCanvasSize) {
+                   Module.setCanvasSize(anchoFisico, altoFisico);
+               }
+           }
+       }
+       
+       window.addEventListener('resize', ajustarNitidezCanvas);
+       window.addEventListener('load', ajustarNitidezCanvas);
+       Module.preRun.push(ajustarNitidezCanvas);
+   </script>
+   {{{ SCRIPT }}}
+</body>
+</html>
